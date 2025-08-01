@@ -16,19 +16,15 @@ class UserController extends Controller
             'password' => ['required']
         ]);
 
+
         if (Auth::attempt($credentials)) {
             $user = User::where('email', $credentials['email'])->firstOrFail();
             $token = $user->createToken('access_token');
 
-            return response()->json([
-                'token' => $token,
-                "user" => $user
-            ]);
+            return $this->toResponse(['user' => $user, 'token' => $token->plainTextToken], 'User logged in', 200);
         }
 
-        return response()->json([
-            'message' => 'error auth, try again'
-        ], 401);
+        return $this->toResponse([], 'error in authentication', 401);
     }
 
     public function register(Request $request)
@@ -41,9 +37,6 @@ class UserController extends Controller
         $user = User::create($credentials);
         $token = $user->createToken('access_token');
 
-        return response()->json([
-            "token" => $token,
-            "user" => $user
-        ]);
+        return $this->toResponse(['token' => $token->plainTextToken, 'user' => $user], 'user registered', 200);
     }
 }
